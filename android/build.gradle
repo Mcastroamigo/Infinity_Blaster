@@ -7,7 +7,7 @@ android {
 
     defaultConfig {
         applicationId "ca.grasley.spaceshooter"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdk 34
         versionCode 1
         versionName "1.0"
@@ -96,6 +96,13 @@ task run(type: Exec) {
 
     def adb = path + "/platform-tools/adb"
     commandLine "$adb", 'shell', 'am', 'start', '-n', 'ca.grasley.spaceshooter/ca.grasley.spaceshooter.AndroidLauncher'
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'androidx.activity:activity:1.10.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
 }
 
 eclipse.project.name = appName + "-android"
