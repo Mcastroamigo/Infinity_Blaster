@@ -86,16 +86,12 @@
 
       <com.google.android.gms.common.SignInButton
           android:id="@+id/btnGoogle"
-          android:theme="@style/Theme.SignIn"
-          tools:ignore="Instantiatable"
-          android:layout_width="match_parent"
-          android:layout_height="50dp"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
           android:layout_marginTop="20dp"
-          android:textColor="@color/black"
-          android:backgroundTint="@color/black"
-          android:textAllCaps="true" />
+          android:layout_gravity="center_horizontal" />
 
-      <TextView
+        <TextView
           android:id="@+id/tvRegister"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"

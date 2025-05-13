@@ -5,6 +5,90 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Registro">
+    android:background="@color/blue_dark"
+    tools:context="ca.grasley.spaceshooter.Registro">
+
+    <!-- ScrollView que envuelve el contenido -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/blue_dark"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:layout_marginTop="48dp"> <!-- Puedes ajustar el margen superior aquí -->
+
+            <!-- Imagen -->
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="219dp"
+                android:layout_height="218dp"
+                android:layout_gravity="center"
+                app:srcCompat="@drawable/logotransparente" />
+
+            <!-- Título -->
+            <TextView
+                android:id="@+id/tvCreateAccount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:text="Crea tu nueva cuenta"
+                android:textColor="@color/amarillo"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_gravity="center" />
+
+            <!-- EditText para el email -->
+            <EditText
+                android:id="@+id/etEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:textColor="#000000"
+                android:textColorHint="#000000"
+                android:hint="Correo electrónico"
+                android:inputType="textEmailAddress"
+                android:padding="12dp" />
+
+            <!-- EditText para la contraseña -->
+            <EditText
+                android:id="@+id/etPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:textColor="#000000"
+                android:textColorHint="#000000"
+                android:hint="Contraseña"
+                android:inputType="textPassword"
+                android:padding="12dp" />
+
+            <!-- Botón de registrarse -->
+            <Button
+                android:id="@+id/btnSignUp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:background="@color/morado"
+                android:minHeight="48dp"
+                android:text="Registrarse"
+                android:textColor="@color/white" />
+
+            <!-- Enlace para iniciar sesión -->
+            <TextView
+                android:id="@+id/tvAlreadyHaveAccount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="¿Ya tienes cuenta? Inicia sesión"
+                android:textColor="@color/amarillo"
+                android:textSize="14sp"
+                android:textStyle="italic"
+                android:layout_gravity="center" />
+
+        </LinearLayout>
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

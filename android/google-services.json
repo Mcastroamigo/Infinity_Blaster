@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "315186431928",
+    "project_id": "infinity-blaster",
+    "storage_bucket": "infinity-blaster.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:315186431928:android:2efbd73fe41d817b94f14d",
+        "android_client_info": {
+          "package_name": "ca.grasley.spaceshooter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJJFS0tnuictlDPQQUJS9T7XTwHuKeiGA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

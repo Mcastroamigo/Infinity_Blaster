@@ -2,16 +2,21 @@ apply plugin: 'com.android.application'
 
 android {
     namespace 'ca.grasley.spaceshooter'
-    compileSdk 34
-    buildToolsVersion "34.0.0"
+    compileSdk 35
 
     defaultConfig {
         applicationId "ca.grasley.spaceshooter"
-        minSdkVersion 21
-        targetSdk 34
+        minSdkVersion 23
+        targetSdk 35
         versionCode 1
         versionName "1.0"
     }
+
+    // Definir la configuración natives correctamente
+    configurations {
+        natives
+    }
+
 
     sourceSets {
         main {
@@ -40,7 +45,38 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    // Habilitar desugaring para bibliotecas Java 8
+    defaultConfig {
+        // Habilitar desugaring
+        javaCompileOptions {
+            annotationProcessorOptions {
+
+            }
+        }
+    }
+
+    // Configuración adicional para desugaring
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    // Para solucionar problemas de desugaring con bibliotecas
+    packagingOptions {
+        pickFirst 'META-INF/gradle/incremental.annotation.processors'
+    }
+
+    // Habilitar el uso de desugaring para Java 8
+    android {
+        compileOptions {
+            coreLibraryDesugaringEnabled true
+        }
+    }
 }
+
+// Añadir el complemento de Google Services
+apply plugin: 'com.google.gms.google-services'  // Agregado aquí
 
 // Configuración de copia de nativos
 task copyAndroidNatives {
@@ -103,6 +139,32 @@ dependencies {
     implementation 'com.google.android.material:material:1.12.0'
     implementation 'androidx.activity:activity:1.10.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
+    implementation 'com.google.android.gms:play-services-base:18.7.0'
+    implementation 'com.google.android.gms:play-services-tasks:18.3.0'
+    implementation 'com.google.android.gms:play-services-basement:18.7.0'
+
+    // Añadir la BoM de Firebase
+    implementation platform('com.google.firebase:firebase-bom:33.13.0')
+
+    // Añadir Firebase Analytics
+    implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-auth:23.2.0'
+
+    // Dependencias de libGDX para Android
+    implementation "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
+    implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi"
+    implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a"
+    implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-arm64-v8a"
+    implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86"
+    implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86_64"
+    implementation project(':core')
+
+    // Añadir otras dependencias de Firebase según sea necesario
+    // Por ejemplo, si necesitas Firebase Authentication:
+    // implementation 'com.google.firebase:firebase-auth'
+
+    // Añadir coreLibraryDesugaring como dependencia
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.2'
 }
 
 eclipse.project.name = appName + "-android"

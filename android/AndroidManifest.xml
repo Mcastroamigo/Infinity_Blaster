@@ -9,6 +9,21 @@
         android:isGame="true"
         android:label="@string/app_name"
         android:theme="@style/GdxTheme">
+
+        <!-- Esta será la actividad inicial, la de inicio de sesión -->
+        <activity
+            android:name=".InicioSesion"
+            android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:screenOrientation="landscape">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Las demás actividades de la app -->
         <activity
             android:name=".PaginaPrincipal"
             android:exported="false" />
@@ -17,18 +32,6 @@
             android:exported="false" />
         <activity
             android:name=".AndroidLauncher"
-            android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout"
-            android:exported="true"
-            android:label="@string/app_name"
-            android:screenOrientation="landscape">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".InicioSesion"
             android:exported="false" />
     </application>
 
