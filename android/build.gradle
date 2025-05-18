@@ -1,29 +1,38 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
+
+ext.gdxVersion = '1.12.0'
 
 android {
     namespace 'ca.grasley.spaceshooter'
     compileSdk 35
 
     defaultConfig {
+
+
+
         applicationId "ca.grasley.spaceshooter"
         minSdkVersion 23
         targetSdk 35
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
+
+// ❗️Filtro de ABI para evitar cargar armeabi (obsoleto)
+        ndk {
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+        }
+
     }
 
-    // Definir la configuración natives correctamente
     configurations {
         natives
     }
-
 
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
             java.srcDirs = ['src']
-            aidl.srcDirs = ['src']
-            renderscript.srcDirs = ['src']
             res.srcDirs = ['res']
             assets.srcDirs = ['assets']
             jniLibs.srcDirs = ['libs']
@@ -32,6 +41,7 @@ android {
 
     packagingOptions {
         exclude 'META-INF/robovm/ios/robovm.xml'
+        pickFirst 'META-INF/gradle/incremental.annotation.processors'
     }
 
     buildTypes {
@@ -44,44 +54,15 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+        coreLibraryDesugaringEnabled true
     }
 
-    // Habilitar desugaring para bibliotecas Java 8
-    defaultConfig {
-        // Habilitar desugaring
-        javaCompileOptions {
-            annotationProcessorOptions {
 
-            }
-        }
-    }
-
-    // Configuración adicional para desugaring
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    // Para solucionar problemas de desugaring con bibliotecas
-    packagingOptions {
-        pickFirst 'META-INF/gradle/incremental.annotation.processors'
-    }
-
-    // Habilitar el uso de desugaring para Java 8
-    android {
-        compileOptions {
-            coreLibraryDesugaringEnabled true
-        }
-    }
 }
 
-// Añadir el complemento de Google Services
-apply plugin: 'com.google.gms.google-services'  // Agregado aquí
-
-// Configuración de copia de nativos
+// ✅ Actualizada sin armeabi
 task copyAndroidNatives {
     doFirst {
-        file("libs/armeabi/").mkdirs()
         file("libs/armeabi-v7a/").mkdirs()
         file("libs/arm64-v8a/").mkdirs()
         file("libs/x86_64/").mkdirs()
@@ -91,7 +72,6 @@ task copyAndroidNatives {
             def outputDir = null
             if (jar.name.endsWith("natives-arm64-v8a.jar")) outputDir = file("libs/arm64-v8a")
             if (jar.name.endsWith("natives-armeabi-v7a.jar")) outputDir = file("libs/armeabi-v7a")
-            if (jar.name.endsWith("natives-armeabi.jar")) outputDir = file("libs/armeabi")
             if (jar.name.endsWith("natives-x86_64.jar")) outputDir = file("libs/x86_64")
             if (jar.name.endsWith("natives-x86.jar")) outputDir = file("libs/x86")
             if (outputDir != null) {
@@ -105,66 +85,61 @@ task copyAndroidNatives {
     }
 }
 
-tasks.whenTaskAdded { packageTask ->
-    if (packageTask.name.contains("package")) {
-        packageTask.dependsOn 'copyAndroidNatives'
+tasks.whenTaskAdded { task ->
+    if (task.name.contains("package")) {
+        task.dependsOn copyAndroidNatives
     }
 }
 
-// Tarea para ejecutar la aplicación
 task run(type: Exec) {
-    def path
-    def localProperties = project.file("../local.properties")
-    if (localProperties.exists()) {
-        Properties properties = new Properties()
-        localProperties.withInputStream { instr ->
-            properties.load(instr)
-        }
-        def sdkDir = properties.getProperty('sdk.dir')
-        if (sdkDir) {
-            path = sdkDir
-        } else {
-            path = "$System.env.ANDROID_HOME"
-        }
-    } else {
-        path = "$System.env.ANDROID_HOME"
+    def sdkDir = null
+    def localProps = file("../local.properties")
+    if (localProps.exists()) {
+        Properties props = new Properties()
+        localProps.withInputStream { props.load(it) }
+        sdkDir = props.getProperty('sdk.dir')
     }
-
-    def adb = path + "/platform-tools/adb"
-    commandLine "$adb", 'shell', 'am', 'start', '-n', 'ca.grasley.spaceshooter/ca.grasley.spaceshooter.AndroidLauncher'
+    sdkDir = sdkDir ?: System.env.ANDROID_HOME
+    commandLine "$sdkDir/platform-tools/adb", 'shell', 'am', 'start', '-n', 'ca.grasley.spaceshooter/ca.grasley.spaceshooter.AndroidLauncher'
 }
 
 dependencies {
+    // AndroidX + Material
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'com.google.android.material:material:1.12.0'
     implementation 'androidx.activity:activity:1.10.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
+
+    // Firebase
     implementation 'com.google.android.gms:play-services-base:18.7.0'
     implementation 'com.google.android.gms:play-services-tasks:18.3.0'
     implementation 'com.google.android.gms:play-services-basement:18.7.0'
-
-    // Añadir la BoM de Firebase
     implementation platform('com.google.firebase:firebase-bom:33.13.0')
-
-    // Añadir Firebase Analytics
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.google.firebase:firebase-auth:23.2.0'
 
-    // Dependencias de libGDX para Android
+    // libGDX core y backend Android
+    implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
     implementation "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
-    implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi"
+
+    // libGDX natives (✅ sin armeabi)
     implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a"
     implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-arm64-v8a"
     implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86"
     implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86_64"
+
+    // FreeType
+    implementation "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
+    implementation "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-armeabi-v7a"
+    implementation "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-arm64-v8a"
+    implementation "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-x86"
+    implementation "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-x86_64"
+
+    // Módulo core
     implementation project(':core')
 
-    // Añadir otras dependencias de Firebase según sea necesario
-    // Por ejemplo, si necesitas Firebase Authentication:
-    // implementation 'com.google.firebase:firebase-auth'
-
-    // Añadir coreLibraryDesugaring como dependencia
+    // Java 8 desugaring
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.2'
 }
 
-eclipse.project.name = appName + "-android"
+eclipse.project.name = "Infinity_Blaster"

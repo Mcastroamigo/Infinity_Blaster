@@ -1,1 +1,3 @@
-include 'desktop', 'android', 'core'
+rootProject.name = 'Infinity_Blaster'
+
+include 'android', 'core'
