@@ -2,5 +2,7 @@
 <resources>
 
     <string name="app_name">SpaceShooter</string>
+    <string name="default_web_client_id">315186431928-jd84b0e6d027sorq9h4a1uoohkf4iqrs.apps.googleusercontent.com</string>
+
 
 </resources>

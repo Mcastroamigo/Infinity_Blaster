@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="etGmail" type="id">etGmail</item>
+    <item name="btnLogin" type="id">btnLogin</item>
+    <item name="tvForgotPassword" type="id">tvForgotPassword</item>
+    <item name="btnGoogle" type="id">btnGoogle</item>
+    <item name="tvRegister" type="id">tvRegister</item>
+    <item name="imgLogo" type="id">imgLogo</item>
+</resources>
