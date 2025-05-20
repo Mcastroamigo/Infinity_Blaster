@@ -1,5 +1,6 @@
 package ca.grasley.spaceshooter;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
@@ -24,66 +25,55 @@ import java.util.ListIterator;
 import java.util.Locale;
 
 class GameScreen implements Screen {
-
-    //screen
+    private SpaceShooterGame game;
+    private SettingsManager settingsManager;
     private Camera camera;
     private Viewport viewport;
-
-    //graphics
     private SpriteBatch batch;
     private TextureAtlas textureAtlas;
     private Texture explosionTexture;
-
     private TextureRegion[] backgrounds;
-    private float backgroundHeight; //height of background in World units
-
+    private float backgroundHeight;
     private TextureRegion playerShipTextureRegion, playerShieldTextureRegion,
             enemyShipTextureRegion, enemyShieldTextureRegion,
             playerLaserTextureRegion, enemyLaserTextureRegion;
-
-    //timing
-    private float[] backgroundOffsets = {0, 0, 0, 0};
+    private float[] backgroundOffsets;
     private float backgroundMaxScrollingSpeed;
     private float timeBetweenEnemySpawns = 1f;
     private float enemySpawnTimer = 0;
-
-    //world parameters
     private final float WORLD_WIDTH = 72;
     private final float WORLD_HEIGHT = 128;
     private final float TOUCH_MOVEMENT_THRESHOLD = 5f;
-
-    //game objects
     private PlayerShip playerShip;
     private LinkedList<EnemyShip> enemyShipList;
     private LinkedList<Laser> playerLaserList;
     private LinkedList<Laser> enemyLaserList;
     private LinkedList<Explosion> explosionList;
-
     private int score = 0;
+    private BitmapFont font;
+    private float hudVerticalMargin, hudLeftX, hudRightX, hudCentreX, hudRow1Y, hudRow2Y, hudSectionWidth;
 
-    //Heads-Up Display
-    BitmapFont font;
-    float hudVerticalMargin, hudLeftX, hudRightX, hudCentreX, hudRow1Y, hudRow2Y, hudSectionWidth;
-
-    GameScreen() {
+    GameScreen(SpaceShooterGame game, SettingsManager settingsManager) {
+        this.game = game;
+        this.settingsManager = settingsManager;
 
         camera = new OrthographicCamera();
         viewport = new StretchViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
 
-        //set up the texture atlas
+        batch = new SpriteBatch();
+
         textureAtlas = new TextureAtlas("images.atlas");
 
-        //setting up the background
         backgrounds = new TextureRegion[4];
         backgrounds[0] = textureAtlas.findRegion("Starscape00");
         backgrounds[1] = textureAtlas.findRegion("Starscape01");
         backgrounds[2] = textureAtlas.findRegion("Starscape02");
         backgrounds[3] = textureAtlas.findRegion("Starscape03");
 
+        backgroundOffsets = new float[4];
         backgroundHeight = WORLD_HEIGHT * 2;
-        backgroundMaxScrollingSpeed = (float) (WORLD_HEIGHT) / 4;
+        backgroundMaxScrollingSpeed = WORLD_HEIGHT / 4f;
 
-        //initialize texture regions
         playerShipTextureRegion = textureAtlas.findRegion("playerShip2_blue");
         enemyShipTextureRegion = textureAtlas.findRegion("enemyRed3");
         playerShieldTextureRegion = textureAtlas.findRegion("shield2");
@@ -95,7 +85,6 @@ class GameScreen implements Screen {
 
         explosionTexture = new Texture("explosion.png");
 
-        //set up game objects
         playerShip = new PlayerShip(WORLD_WIDTH / 2, WORLD_HEIGHT / 4,
                 10, 10,
                 48, 3,
@@ -103,19 +92,19 @@ class GameScreen implements Screen {
                 playerShipTextureRegion, playerShieldTextureRegion, playerLaserTextureRegion);
 
         enemyShipList = new LinkedList<>();
-
         playerLaserList = new LinkedList<>();
         enemyLaserList = new LinkedList<>();
-
         explosionList = new LinkedList<>();
 
-        batch = new SpriteBatch();
+        Gdx.app.log("GameScreen", "Backgrounds array initialized: " + (backgrounds != null));
+        Gdx.app.log("GameScreen", "BackgroundOffsets array initialized: " + (backgroundOffsets != null));
+        Gdx.app.log("GameScreen", "SpriteBatch initialized: " + (batch != null));
+        Gdx.app.log("GameScreen", "PlayerShip initialized: " + (playerShip != null));
 
         prepareHUD();
     }
 
     private void prepareHUD() {
-        //Create a BitmapFont from our font file
         FreeTypeFontGenerator fontGenerator = new FreeTypeFontGenerator(Gdx.files.internal("EdgeOfTheGalaxyRegular-OVEa6.otf"));
         FreeTypeFontGenerator.FreeTypeFontParameter fontParameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
 
@@ -126,10 +115,8 @@ class GameScreen implements Screen {
 
         font = fontGenerator.generateFont(fontParameter);
 
-        //scale the font to fit world
         font.getData().setScale(0.08f);
 
-        //calculate hud margins, etc.
         hudVerticalMargin = font.getCapHeight() / 2;
         hudLeftX = hudVerticalMargin;
         hudRightX = WORLD_WIDTH * 2 / 3 - hudLeftX;
@@ -143,7 +130,6 @@ class GameScreen implements Screen {
     public void render(float deltaTime) {
         batch.begin();
 
-        //scrolling background
         renderBackground(deltaTime);
 
         detectInput(deltaTime);
@@ -158,30 +144,25 @@ class GameScreen implements Screen {
             enemyShip.update(deltaTime);
             enemyShip.draw(batch);
         }
-        //player ship
+
         playerShip.draw(batch);
 
-        //lasers
         renderLasers(deltaTime);
 
-        //detect collisions between lasers and ships
         detectCollisions();
 
-        //explosions
         updateAndRenderExplosions(deltaTime);
 
-        //hud rendering
         updateAndRenderHUD();
 
         batch.end();
     }
 
     private void updateAndRenderHUD() {
-        //render top row labels
         font.draw(batch, "Score", hudLeftX, hudRow1Y, hudSectionWidth, Align.left, false);
         font.draw(batch, "Shield", hudCentreX, hudRow1Y, hudSectionWidth, Align.center, false);
         font.draw(batch, "Lives", hudRightX, hudRow1Y, hudSectionWidth, Align.right, false);
-        //render second row values
+
         font.draw(batch, String.format(Locale.getDefault(), "%06d", score), hudLeftX, hudRow2Y, hudSectionWidth, Align.left, false);
         font.draw(batch, String.format(Locale.getDefault(), "%02d", playerShip.shield), hudCentreX, hudRow2Y, hudSectionWidth, Align.center, false);
         font.draw(batch, String.format(Locale.getDefault(), "%02d", playerShip.lives), hudRightX, hudRow2Y, hudSectionWidth, Align.right, false);
@@ -200,13 +181,13 @@ class GameScreen implements Screen {
             enemySpawnTimer -= timeBetweenEnemySpawns;
         }
     }
-
     private void detectInput(float deltaTime) {
+        if (playerShip == null) {
+            Gdx.app.log("GameScreen", "PlayerShip is null in detectInput!");
+            return;
+        }
+
         //keyboard input
-
-        //strategy: determine the max distance the ship can move
-        //check each key that matters and move accordingly
-
         float leftLimit, rightLimit, upLimit, downLimit;
         leftLimit = -playerShip.boundingBox.x;
         downLimit = -playerShip.boundingBox.y;
@@ -229,15 +210,12 @@ class GameScreen implements Screen {
 
         //touch input (also mouse)
         if (Gdx.input.isTouched()) {
-            //get the screen position of the touch
             float xTouchPixels = Gdx.input.getX();
             float yTouchPixels = Gdx.input.getY();
 
-            //convert to world position
             Vector2 touchPoint = new Vector2(xTouchPixels, yTouchPixels);
             touchPoint = viewport.unproject(touchPoint);
 
-            //calculate the x and y differences
             Vector2 playerShipCentre = new Vector2(
                     playerShip.boundingBox.x + playerShip.boundingBox.width / 2,
                     playerShip.boundingBox.y + playerShip.boundingBox.height / 2);
@@ -248,7 +226,6 @@ class GameScreen implements Screen {
                 float xTouchDifference = touchPoint.x - playerShipCentre.x;
                 float yTouchDifference = touchPoint.y - playerShipCentre.y;
 
-                //scale to the maximum speed of the ship
                 float xMove = xTouchDifference / touchDistance * playerShip.movementSpeed * deltaTime;
                 float yMove = yTouchDifference / touchDistance * playerShip.movementSpeed * deltaTime;
 
@@ -264,8 +241,6 @@ class GameScreen implements Screen {
     }
 
     private void moveEnemy(EnemyShip enemyShip, float deltaTime) {
-        //strategy: determine the max distance the ship can move
-
         float leftLimit, rightLimit, upLimit, downLimit;
         leftLimit = -enemyShip.boundingBox.x;
         downLimit = (float) WORLD_HEIGHT / 2 - enemyShip.boundingBox.y;
@@ -285,7 +260,6 @@ class GameScreen implements Screen {
     }
 
     private void detectCollisions() {
-        //for each player laser, check whether it intersects an enemy ship
         ListIterator<Laser> laserListIterator = playerLaserList.listIterator();
         while (laserListIterator.hasNext()) {
             Laser laser = laserListIterator.next();
@@ -294,13 +268,14 @@ class GameScreen implements Screen {
                 EnemyShip enemyShip = enemyShipListIterator.next();
 
                 if (enemyShip.intersects(laser.boundingBox)) {
-                    //contact with enemy ship
                     if (enemyShip.hitAndCheckDestroyed(laser)) {
                         enemyShipListIterator.remove();
-                        explosionList.add(
-                                new Explosion(explosionTexture,
-                                        new Rectangle(enemyShip.boundingBox),
-                                        0.7f));
+                        explosionList.add(new Explosion(explosionTexture, new Rectangle(enemyShip.boundingBox), 0.7f));
+
+                        if (Gdx.app.getType() == Application.ApplicationType.Android && settingsManager.isVibrationEnabled()) {
+                            game.getAndroidInterface().vibrate(100);
+                        }
+
                         score += 100;
                     }
                     laserListIterator.remove();
@@ -308,25 +283,22 @@ class GameScreen implements Screen {
                 }
             }
         }
-        //for each enemy laser, check whether it intersects the player ship
         laserListIterator = enemyLaserList.listIterator();
         while (laserListIterator.hasNext()) {
             Laser laser = laserListIterator.next();
             if (playerShip.intersects(laser.boundingBox)) {
-                //contact with player ship
                 if (playerShip.hitAndCheckDestroyed(laser)) {
                     explosionList.add(
                             new Explosion(explosionTexture,
                                     new Rectangle(playerShip.boundingBox),
                                     1.6f));
                     playerShip.shield = 10;
-                    playerShip.lives--; 
+                    playerShip.lives--;
                 }
                 laserListIterator.remove();
             }
         }
     }
-
     private void updateAndRenderExplosions(float deltaTime) {
         ListIterator<Explosion> explosionListIterator = explosionList.listIterator();
         while (explosionListIterator.hasNext()) {
@@ -341,13 +313,10 @@ class GameScreen implements Screen {
     }
 
     private void renderLasers(float deltaTime) {
-        //create new lasers
-        //player lasers
         if (playerShip.canFireLaser()) {
             Laser[] lasers = playerShip.fireLasers();
             playerLaserList.addAll(Arrays.asList(lasers));
         }
-        //enemy lasers
         ListIterator<EnemyShip> enemyShipListIterator = enemyShipList.listIterator();
         while (enemyShipListIterator.hasNext()) {
             EnemyShip enemyShip = enemyShipListIterator.next();
@@ -356,8 +325,6 @@ class GameScreen implements Screen {
                 enemyLaserList.addAll(Arrays.asList(lasers));
             }
         }
-        //draw lasers
-        //remove old lasers
         ListIterator<Laser> iterator = playerLaserList.listIterator();
         while (iterator.hasNext()) {
             Laser laser = iterator.next();
@@ -379,47 +346,51 @@ class GameScreen implements Screen {
     }
 
     private void renderBackground(float deltaTime) {
-
-        //update position of background images
-        backgroundOffsets[0] += deltaTime * backgroundMaxScrollingSpeed / 8;
-        backgroundOffsets[1] += deltaTime * backgroundMaxScrollingSpeed / 4;
-        backgroundOffsets[2] += deltaTime * backgroundMaxScrollingSpeed / 2;
-        backgroundOffsets[3] += deltaTime * backgroundMaxScrollingSpeed;
-
-        //draw each background layer
-        for (int layer = 0; layer < backgroundOffsets.length; layer++) {
-            if (backgroundOffsets[layer] > WORLD_HEIGHT) {
-                backgroundOffsets[layer] = 0;
+        // Actualizar offsets para desplazamiento del fondo
+        for (int i = 0; i < backgrounds.length; i++) {
+            backgroundOffsets[i] += backgroundMaxScrollingSpeed * (i + 1) / backgrounds.length * deltaTime;
+            if (backgroundOffsets[i] > backgroundHeight) {
+                backgroundOffsets[i] -= backgroundHeight;
             }
-            batch.draw(backgrounds[layer], 0, -backgroundOffsets[layer],
-                    WORLD_WIDTH, backgroundHeight);
+        }
+
+        // Dibujar fondos en capas
+        for (int i = 0; i < backgrounds.length; i++) {
+            float y = -backgroundOffsets[i];
+            batch.draw(backgrounds[i], 0, y, WORLD_WIDTH, backgroundHeight);
+            batch.draw(backgrounds[i], 0, y + backgroundHeight, WORLD_WIDTH, backgroundHeight);
         }
     }
 
     @Override
     public void resize(int width, int height) {
-        viewport.update(width, height, true);
-        batch.setProjectionMatrix(camera.combined);
+        Gdx.app.log("GameScreen", "Resizing to: " + width + "x" + height);
+        if (viewport != null) {
+            viewport.update(width, height, true);
+        } else {
+            Gdx.app.log("GameScreen", "Viewport is null during resize!");
+        }
+        if (batch != null) {
+            batch.setProjectionMatrix(camera.combined);
+        } else {
+            Gdx.app.log("GameScreen", "SpriteBatch is null during resize!");
+        }
     }
 
     @Override
     public void pause() {
-
     }
 
     @Override
     public void resume() {
-
     }
 
     @Override
     public void hide() {
-
     }
 
     @Override
     public void show() {
-
     }
 
     @Override

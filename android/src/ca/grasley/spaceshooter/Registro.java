@@ -17,7 +17,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-public class Registro extends AppCompatActivity {
+public class Registro extends BaseActivity  {
 
     private EditText etEmail, etPassword;
     private Button btnSignUp;

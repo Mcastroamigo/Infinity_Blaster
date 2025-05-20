@@ -20,7 +20,7 @@ import com.google.firebase.auth.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class InicioSesion extends AppCompatActivity {
+public class InicioSesion extends BaseActivity  {
 
     private static final String TAG = "InicioSesion";
     private static final int RC_SIGN_IN = 9001;
@@ -37,6 +37,7 @@ public class InicioSesion extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_inicio_sesion);
+        MusicManager.start(this, R.raw.background_music);
 
         // Inicialización Firebase Auth
         mAuth = FirebaseAuth.getInstance();
