@@ -126,10 +126,12 @@ public class InicioSesion extends AppCompatActivity {
     }
 
     private void goToMain() {
-        Intent intent = new Intent(InicioSesion.this, AndroidLauncher.class); // tu pantalla del juego
+        Intent intent = new Intent(InicioSesion.this, PaginaPrincipal.class);
         startActivity(intent);
         finish();
     }
+
+
 
     private boolean isEmailValid(String email) {
         Pattern pattern = Pattern.compile("^[\\w.-]+@([\\w\\-]+\\.)+[A-Z]{2,4}$", Pattern.CASE_INSENSITIVE);
