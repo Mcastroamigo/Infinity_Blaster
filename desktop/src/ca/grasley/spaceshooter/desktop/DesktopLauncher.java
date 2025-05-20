@@ -2,6 +2,7 @@ package ca.grasley.spaceshooter.desktop;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+
 import ca.grasley.spaceshooter.SpaceShooterGame;
 
 public class DesktopLauncher {

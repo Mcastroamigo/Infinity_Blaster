@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@drawable/gradient_background">
+
+    <!-- Imagen de perfil -->
+    <ImageView
+        android:id="@+id/profileImage"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="16dp"
+        android:src="@drawable/ic_profile"
+        android:background="@drawable/circle_border" />
+
+    <!-- Nombre de usuario -->
+    <TextView
+        android:id="@+id/userName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="Nombre de Usuario"
+        android:textSize="18sp"
+        android:textColor="#FFFFFF" />
+
+    <!-- Sección de Sonido -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Sonido"
+        android:textSize="18sp"
+        android:textColor="#FFFFFF" />
+
+    <SeekBar
+        android:id="@+id/soundSeekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:progress="50"
+        android:progressTint="#FFC107"
+        android:thumbTint="#FFC107" />
+
+    <!-- Sección de Vibración -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <Switch
+            android:id="@+id/vibrationSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Vibración"
+            android:textColor="#FFFFFF"
+            android:thumbTint="#4CAF50" />
+
+        <View
+            android:id="@+id/vibrationIndicator"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/indicator_background" />
+    </LinearLayout>
+
+    <!-- Sección de Idioma -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Idioma"
+        android:textSize="18sp"
+        android:textColor="#FFFFFF" />
+
+    <Spinner
+        android:id="@+id/languageSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:entries="@array/languages_array"
+        android:spinnerMode="dropdown" />
+
+    <!-- Sección de Tamaño de Texto -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Tamaño de Texto"
+        android:textSize="18sp"
+        android:textColor="#FFFFFF" />
+
+    <SeekBar
+        android:id="@+id/textSizeSeekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:progress="50"
+        android:progressTint="#FFC107"
+        android:thumbTint="#FFC107" />
+
+    <!-- Botón de Cerrar Sesión -->
+    <Button
+        android:id="@+id/logoutButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:backgroundTint="#FF5722"
+        android:text="Cerrar Sesión"
+        android:textColor="#FFFFFF" />
+
+    <!-- Botón de Guardar Cambios -->
+    <Button
+        android:id="@+id/saveButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="#4CAF50"
+        android:text="Guardar Cambios"
+        android:textColor="#FFFFFF" />
+
+</LinearLayout>
