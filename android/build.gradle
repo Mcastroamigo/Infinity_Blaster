@@ -88,6 +88,7 @@ dependencies {
 
     // Módulo core
     implementation project(':core')
+    implementation 'com.google.firebase:firebase-firestore:25.1.4'
 
     // Java 8 desugaring
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.3'

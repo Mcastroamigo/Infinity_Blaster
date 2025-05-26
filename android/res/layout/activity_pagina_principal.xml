@@ -198,4 +198,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+
+    <!-- GIF-->
+    <ImageView
+        android:id="@+id/bottomGif"
+        android:layout_width="0dp"
+        android:layout_height="150dp"
+        android:scaleType="fitCenter"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:contentDescription="GIF animado" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
