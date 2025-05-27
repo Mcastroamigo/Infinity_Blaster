@@ -26,7 +26,8 @@ public class SpaceShooterGame extends Game {
 
     @Override
     public void create() {
-        gameScreen = new GameScreen(this, settingsManager);  // ✅ Se pasa el settingsManager correctamente
+        gameScreen = new GameScreen(this, androidInterface, settingsManager);  // ✅ CORRECTO
+
         setScreen(gameScreen);
     }
 

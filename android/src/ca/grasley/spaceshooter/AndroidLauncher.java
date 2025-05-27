@@ -5,8 +5,15 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.content.Context;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
 
 public class AndroidLauncher extends AndroidApplication implements AndroidInterface {
 
@@ -18,6 +25,40 @@ public class AndroidLauncher extends AndroidApplication implements AndroidInterf
 		initialize(new SpaceShooterGame(this, settingsManager), config);
 		// ✅ Se pasan ambos objetos
 	}
+
+	@Override
+	public void savePoints(int newPoints) {
+		FirebaseFirestore db = FirebaseFirestore.getInstance();
+		FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+		if (user != null) {
+			String uid = user.getUid();
+			DocumentReference usuarioRef = db.collection("usuarios").document(uid);
+
+			usuarioRef.get().addOnSuccessListener(documentSnapshot -> {
+				if (documentSnapshot.exists()) {
+					Long puntosActuales = documentSnapshot.getLong("puntos");
+					if (puntosActuales == null || newPoints > puntosActuales) {
+						usuarioRef.update("puntos", newPoints)
+								.addOnSuccessListener(aVoid -> Gdx.app.log("Firebase", "Mejor puntuación actualizada correctamente"))
+								.addOnFailureListener(e -> Gdx.app.log("Firebase", "Error al actualizar puntos: " + e.getMessage()));
+					} else {
+						Gdx.app.log("Firebase", "Puntuación no actualizada, ya existe una mejor o igual.");
+					}
+				} else {
+					usuarioRef.set(new HashMap<String, Object>() {{
+								put("puntos", newPoints);
+							}}).addOnSuccessListener(aVoid -> Gdx.app.log("Firebase", "Usuario creado con puntos"))
+							.addOnFailureListener(e -> Gdx.app.log("Firebase", "Error al crear usuario: " + e.getMessage()));
+				}
+			}).addOnFailureListener(e -> Gdx.app.log("Firebase", "Error al obtener documento: " + e.getMessage()));
+		} else {
+			Gdx.app.log("Firebase", "Usuario no autenticado, no se pueden guardar puntos.");
+		}
+	}
+
+
+
 
 	@Override
 	public void vibrate(int milliseconds) {
