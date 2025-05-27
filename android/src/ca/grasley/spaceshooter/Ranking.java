@@ -46,8 +46,8 @@ public class Ranking extends AppCompatActivity {
     }
 
     private void loadRankingData() {
-        db.collection("users")
-                .orderBy("puntuacion", Query.Direction.DESCENDING)
+        db.collection("usuarios") // <--- usa la misma colección que en PaginaPrincipal
+                .orderBy("puntos", Query.Direction.DESCENDING)
                 .addSnapshotListener((value, error) -> {
                     if (error != null) {
                         Log.e("RankingActivity", "Error al obtener datos", error);
@@ -55,17 +55,20 @@ public class Ranking extends AppCompatActivity {
                     }
 
                     userList.clear();
+                    int posicion = 1;
                     for (QueryDocumentSnapshot doc : value) {
                         String userId = doc.getId();
-                        String usuario = doc.getString("usuario");
-                        Long puntosLong = doc.getLong("puntuacion");
+                        String usuario = doc.getString("nombre"); // mismo campo que en PaginaPrincipal
+                        Long puntosLong = doc.getLong("puntos");
 
                         if (usuario != null && puntosLong != null) {
                             int puntuacion = puntosLong.intValue();
-                            userList.add(new UsuarioRanking(userId, usuario, puntuacion));
+                            userList.add(new UsuarioRanking(posicion + ". " + usuario, usuario, puntuacion));
+                            posicion++;
                         }
                     }
                     rankingAdapter.notifyDataSetChanged();
                 });
     }
+
 }

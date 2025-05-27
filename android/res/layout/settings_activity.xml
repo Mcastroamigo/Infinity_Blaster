@@ -68,22 +68,6 @@
             android:background="@drawable/indicator_background" />
     </LinearLayout>
 
-    <!-- Sección de Idioma -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="Idioma"
-        android:textSize="18sp"
-        android:textColor="#FFFFFF" />
-
-    <Spinner
-        android:id="@+id/languageSpinner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:entries="@array/languages_array"
-        android:spinnerMode="dropdown" />
 
     <!-- Sección de Tamaño de Texto -->
     <TextView

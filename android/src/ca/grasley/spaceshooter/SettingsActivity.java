@@ -4,18 +4,24 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.widget.*;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.*;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.firebase.auth.FirebaseUser;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class SettingsActivity extends BaseActivity  {
 
@@ -24,7 +30,6 @@ public class SettingsActivity extends BaseActivity  {
     private SeekBar soundSeekBar;
     private Switch vibrationSwitch;
     private View vibrationIndicator;
-    private Spinner languageSpinner;
     private SeekBar textSizeSeekBar;
     private Button logoutButton;
     private Button saveButton;
@@ -51,10 +56,8 @@ public class SettingsActivity extends BaseActivity  {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings_activity);
 
-        // Firebase Auth
+        // Inicializa Firebase Auth y Google Sign-In
         mAuth = FirebaseAuth.getInstance();
-
-        // Google Sign-In
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
@@ -62,18 +65,22 @@ public class SettingsActivity extends BaseActivity  {
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
         // Referencias UI
-        profileImage = findViewById(R.id.profileImage);
-        userName = findViewById(R.id.userName);
-        soundSeekBar = findViewById(R.id.soundSeekBar);
-        vibrationSwitch = findViewById(R.id.vibrationSwitch);
+        profileImage     = findViewById(R.id.profileImage);
+        userName         = findViewById(R.id.userName);
+        soundSeekBar     = findViewById(R.id.soundSeekBar);
+        vibrationSwitch  = findViewById(R.id.vibrationSwitch);
         vibrationIndicator = findViewById(R.id.vibrationIndicator);
-        languageSpinner = findViewById(R.id.languageSpinner);
-        textSizeSeekBar = findViewById(R.id.textSizeSeekBar);
-        logoutButton = findViewById(R.id.logoutButton);
-        saveButton = findViewById(R.id.saveButton);
+        textSizeSeekBar  = findViewById(R.id.textSizeSeekBar);
+        logoutButton     = findViewById(R.id.logoutButton);
+        saveButton       = findViewById(R.id.saveButton);
 
+        // Cargar perfil de FirebaseUser (nombre + foto)
+        loadUserProfile();
+
+        // Carga resto de ajustes guardados
         loadSettings();
 
+        // Listeners
         soundSeekBar.setMax(100);
         soundSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -83,12 +90,12 @@ public class SettingsActivity extends BaseActivity  {
             @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
-        vibrationSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> updateVibrationIndicator(isChecked));
+        vibrationSwitch.setOnCheckedChangeListener((btn, isChecked) -> updateVibrationIndicator(isChecked));
 
         textSizeSeekBar.setMax(100);
         textSizeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                float scale = (progress + 50) / 100.0f; // Escala de 0.5 a 1.5
+                float scale = (progress + 50) / 100.0f; // 0.5–1.5
                 saveFontScale(scale);
                 applyFontScale(scale);
             }
@@ -96,21 +103,50 @@ public class SettingsActivity extends BaseActivity  {
             @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
-        logoutButton.setOnClickListener(v -> logout());
-
         saveButton.setOnClickListener(v -> saveSettings());
+        logoutButton.setOnClickListener(v -> logout());
+    }
+
+    private void loadUserProfile() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) return;
+
+        // Nombre: displayName o extraído del email
+        String name = currentUser.getDisplayName();
+        if (name == null || name.isEmpty()) {
+            String email = currentUser.getEmail();
+            if (email != null && email.contains("@")) {
+                name = email.substring(0, email.indexOf("@"));
+            } else {
+                name = "Usuario";
+            }
+        }
+        userName.setText(name);
+
+        // Foto de perfil si existe
+        if (currentUser.getPhotoUrl() != null) {
+            new Thread(() -> {
+                try {
+                    URL url = new URL(currentUser.getPhotoUrl().toString());
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setDoInput(true);
+                    conn.connect();
+                    InputStream is = conn.getInputStream();
+                    Bitmap bmp = BitmapFactory.decodeStream(is);
+                    runOnUiThread(() -> profileImage.setImageBitmap(bmp));
+                } catch (IOException e) {
+                    Log.e("SettingsActivity", "Error cargando foto", e);
+                }
+            }).start();
+        }
     }
 
     private void setMusicVolume(int progress) {
-        float volume = progress / 100f;
-        MusicManager.setVolume(volume);
+        MusicManager.setVolume(progress / 100f);
     }
 
     private void loadSettings() {
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-
-        String savedUserName = prefs.getString("userName", "Nombre de Usuario");
-        userName.setText(savedUserName);
 
         int soundLevel = prefs.getInt("soundLevel", 50);
         soundSeekBar.setProgress(soundLevel);
@@ -119,9 +155,6 @@ public class SettingsActivity extends BaseActivity  {
         boolean vibrationEnabled = prefs.getBoolean("vibrationEnabled", true);
         vibrationSwitch.setChecked(vibrationEnabled);
         updateVibrationIndicator(vibrationEnabled);
-
-        int languagePosition = prefs.getInt("languagePosition", 0);
-        languageSpinner.setSelection(languagePosition);
 
         int textSizeProgress = (int)((prefs.getFloat("font_scale", 1.0f) * 100) - 50);
         textSizeSeekBar.setProgress(textSizeProgress);
@@ -135,29 +168,23 @@ public class SettingsActivity extends BaseActivity  {
     }
 
     private void saveFontScale(float scale) {
-        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        prefs.edit().putFloat("font_scale", scale).apply();
+        getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                .edit().putFloat("font_scale", scale).apply();
     }
 
     private void applyFontScale(float scale) {
-        Configuration configuration = getResources().getConfiguration();
-        configuration.fontScale = scale;
-
+        Configuration cfg = getResources().getConfiguration();
+        cfg.fontScale = scale;
         DisplayMetrics metrics = getResources().getDisplayMetrics();
-        getResources().updateConfiguration(configuration, metrics);
-
-        recreate(); // Recarga la UI con el nuevo tamaño
+        getResources().updateConfiguration(cfg, metrics);
+        recreate();
     }
 
     private void saveSettings() {
         SharedPreferences.Editor editor = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
-        editor.putString("userName", userName.getText().toString());
         editor.putInt("soundLevel", soundSeekBar.getProgress());
         editor.putBoolean("vibrationEnabled", vibrationSwitch.isChecked());
-        editor.putInt("languagePosition", languageSpinner.getSelectedItemPosition());
-        // El textSize (font_scale) ya se guarda en tiempo real
         editor.apply();
-
         Toast.makeText(this, "Configuración guardada", Toast.LENGTH_SHORT).show();
     }
 
@@ -165,9 +192,9 @@ public class SettingsActivity extends BaseActivity  {
         mAuth.signOut();
         mGoogleSignInClient.signOut().addOnCompleteListener(task -> {
             Toast.makeText(SettingsActivity.this, "Sesión cerrada", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(SettingsActivity.this, InicioSesion.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
+            Intent i = new Intent(SettingsActivity.this, InicioSesion.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(i);
             finish();
         });
     }

@@ -78,18 +78,21 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:33.13.0')
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.google.firebase:firebase-auth:23.2.0'
+    implementation 'com.google.firebase:firebase-firestore:25.1.4'
+
+    // Glide (para cargar imágenes)
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.16.0'
 
     // libGDX core y backend Android
     implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
     implementation "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
-
-    // FreeType (solo las libs Java, no las nativas)
     implementation "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
 
     // Módulo core
     implementation project(':core')
-    implementation 'com.google.firebase:firebase-firestore:25.1.4'
 
     // Java 8 desugaring
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.3'
 }
+
