@@ -14,6 +14,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "315186431928-4t92b4bpv35b5vnmanucoi1lo0rbn271.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ca.grasley.spaceshooter",
+            "certificate_hash": "7ab8d2e70ee71ef67420a16329e525b738822087"
+          }
+        },
+        {
+          "client_id": "315186431928-pf71nqv82e8tjb12rsvig19cfpaftapf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ca.grasley.spaceshooter",
+            "certificate_hash": "7e859cfa398595eab0b20eeb604ddc22fe937e65"
+          }
+        },
+        {
           "client_id": "315186431928-vlbv1vbdhdevogqmigr94mjfmjacr36l.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

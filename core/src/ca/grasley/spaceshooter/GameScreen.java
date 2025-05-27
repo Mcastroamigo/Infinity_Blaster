@@ -62,11 +62,14 @@ class GameScreen implements Screen {
     private BitmapFont font;
     private float hudVerticalMargin, hudLeftX, hudRightX, hudCentreX, hudRow1Y, hudRow2Y, hudSectionWidth;
 
-    GameScreen(SpaceShooterGame game, SettingsManager settingsManager) {
+    GameScreen(SpaceShooterGame game, AndroidInterface androidInterface, SettingsManager settingsManager) {
         this.game = game;
         this.settingsManager = settingsManager;
+        this.androidInterface = androidInterface;  // ✅ Aquí se arregla todo
 
-        camera = new OrthographicCamera();
+
+
+    camera = new OrthographicCamera();
         viewport = new StretchViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
 
         batch = new SpriteBatch();
@@ -143,15 +146,16 @@ class GameScreen implements Screen {
             font.draw(batch, "GAME OVER", WORLD_WIDTH / 2 - 10, WORLD_HEIGHT / 2);
             batch.end();
 
-            // Esperar 2 segundos y luego ir a la pantalla principal
             if (gameOverTimer == 0) {
-                gameOverTimer = TimeUtils.millis(); // Guarda el momento en que ocurrió el GAME OVER
-            } else if (TimeUtils.timeSinceMillis(gameOverTimer) > 2000) { // Han pasado 2 segundos
-                androidInterface.goToMainPage(); // ← Aquí vuelves a la página principal
+                gameOverTimer = TimeUtils.millis();
+                guardarPuntosEnFirebase(score); // ← Nuevo método que escribirás abajo
+            } else if (TimeUtils.timeSinceMillis(gameOverTimer) > 2000) {
+                androidInterface.goToMainPage();
             }
 
             return;
         }
+
 
         //scrolling background
         renderBackground(deltaTime);
@@ -274,6 +278,20 @@ class GameScreen implements Screen {
             }
         }
     }
+
+
+    private void guardarPuntosEnFirebase(int puntos) {
+        if (androidInterface != null) {
+            androidInterface.savePoints(puntos);
+        } else {
+            Gdx.app.log("GameScreen", "AndroidInterface no inicializada, no se pueden guardar puntos.");
+        }
+    }
+
+
+
+
+
 
     private void moveEnemy(EnemyShip enemyShip, float deltaTime) {
         float leftLimit, rightLimit, upLimit, downLimit;
