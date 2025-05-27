@@ -12,7 +12,20 @@
           "package_name": "ca.grasley.spaceshooter"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "315186431928-vlbv1vbdhdevogqmigr94mjfmjacr36l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ca.grasley.spaceshooter",
+            "certificate_hash": "353bd0a0cd522fdd8b0a22ce70fc599aca6f4a10"
+          }
+        },
+        {
+          "client_id": "315186431928-jd84b0e6d027sorq9h4a1uoohkf4iqrs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAJJFS0tnuictlDPQQUJS9T7XTwHuKeiGA"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "315186431928-jd84b0e6d027sorq9h4a1uoohkf4iqrs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
