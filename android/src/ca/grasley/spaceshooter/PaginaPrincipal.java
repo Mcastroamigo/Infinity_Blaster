@@ -80,7 +80,8 @@ public class PaginaPrincipal extends AppCompatActivity {
         }
 
         btnStartGame.setOnClickListener(v -> {
-            Log.d("PaginaPrincipal", "Iniciar juego");
+            Intent intent = new Intent(PaginaPrincipal.this, AndroidLauncher.class);
+            startActivity(intent);
         });
 
         btnRanking.setOnClickListener(v -> startActivity(new Intent(this, Ranking.class)));
