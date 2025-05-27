@@ -15,7 +15,8 @@ public class AndroidLauncher extends AndroidApplication implements AndroidInterf
 		super.onCreate(savedInstanceState);
 		AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
 		SettingsManager settingsManager = new AndroidSettingsManager(this);
-		initialize(new SpaceShooterGame(this, settingsManager), config);  // ✅ Se pasan ambos objetos
+		initialize(new SpaceShooterGame(this, settingsManager), config);
+		// ✅ Se pasan ambos objetos
 	}
 
 	@Override
@@ -25,10 +26,20 @@ public class AndroidLauncher extends AndroidApplication implements AndroidInterf
 			v.vibrate(milliseconds);
 		}
 	}
+	@Override
+	public void goToMainPage() {
+		runOnUiThread(() -> {
+			Intent intent = new Intent(AndroidLauncher.this, PaginaPrincipal.class); // Cambia esto si tu main page tiene otro nombre
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+			startActivity(intent);
+			finish(); // Cierra la actividad actual (el juego)
+		});
+	}
 
 	// Este método se puede llamar desde la clase InicioSesion cuando el usuario se autentique
 	public void launchGameActivity() {
 		Intent intent = new Intent(this, AndroidLauncher.class);
 		startActivity(intent);
 	}
+
 }
