@@ -15,7 +15,8 @@ public class AndroidLauncher extends AndroidApplication implements AndroidInterf
 		super.onCreate(savedInstanceState);
 		AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
 		SettingsManager settingsManager = new AndroidSettingsManager(this);
-		initialize(new SpaceShooterGame(this, settingsManager), config);  // ✅ Se pasan ambos objetos
+		initialize(new SpaceShooterGame(this, settingsManager), config);
+		// ✅ Se pasan ambos objetos
 	}
 
 	@Override
