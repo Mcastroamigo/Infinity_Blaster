@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Align;
@@ -32,6 +33,14 @@ class GameScreen implements Screen {
     private Viewport viewport;
     private boolean gameOver = false;
     private AndroidInterface androidInterface;
+    //power up
+
+    private long lastPowerUpTime = 0;
+    private float powerUpDropChance = 0.2f;
+    private LinkedList<PowerUp> powerUpList = new LinkedList<>();
+    private Texture powerUpTexture;
+
+
     private long gameOverTimer = 0;
     //graphics
     private SpriteBatch batch;
@@ -56,15 +65,36 @@ class GameScreen implements Screen {
     private LinkedList<Explosion> explosionList;
     private boolean difficultyIncreased = false;
     private boolean tripleShotEnabled = false;   // para 4000 pts
+    private float powerUpSpawnTimer = 0f;
+    private final float POWERUP_SPAWN_INTERVAL = 10f;
+    private void spawnPowerUps(float deltaTime) {
+        powerUpSpawnTimer += deltaTime;
 
+        if (powerUpSpawnTimer >= POWERUP_SPAWN_INTERVAL) {
+            powerUpSpawnTimer = 0f;
+
+            // Generar posición X aleatoria dentro del mundo (ajusta según tus límites)
+            float x = MathUtils.random(0, WORLD_WIDTH - powerUpTexture.getWidth());
+            float y = WORLD_HEIGHT; // aparece justo arriba de la pantalla
+
+            // Crear y añadir el power-up a la lista
+            PowerUp newPowerUp = new PowerUp(x, y, powerUpTexture);
+            powerUpList.add(newPowerUp);
+        }
+    }
 
     private int score = 0;
     private BitmapFont font;
     private float hudVerticalMargin, hudLeftX, hudRightX, hudCentreX, hudRow1Y, hudRow2Y, hudSectionWidth;
 
-    GameScreen(SpaceShooterGame game, SettingsManager settingsManager) {
+    GameScreen(SpaceShooterGame game, AndroidInterface androidInterface, SettingsManager settingsManager) {
         this.game = game;
         this.settingsManager = settingsManager;
+        this.androidInterface = androidInterface;  // ✅ Aquí se arregla todo
+        powerUpTexture = new Texture(Gdx.files.internal("power-up.png"));
+        powerUpList = new LinkedList<>();
+
+
 
         camera = new OrthographicCamera();
         viewport = new StretchViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
@@ -143,24 +173,25 @@ class GameScreen implements Screen {
             font.draw(batch, "GAME OVER", WORLD_WIDTH / 2 - 10, WORLD_HEIGHT / 2);
             batch.end();
 
-            // Esperar 2 segundos y luego ir a la pantalla principal
             if (gameOverTimer == 0) {
-                gameOverTimer = TimeUtils.millis(); // Guarda el momento en que ocurrió el GAME OVER
-            } else if (TimeUtils.timeSinceMillis(gameOverTimer) > 2000) { // Han pasado 2 segundos
-                androidInterface.goToMainPage(); // ← Aquí vuelves a la página principal
+                gameOverTimer = TimeUtils.millis();
+                guardarPuntosEnFirebase(score);
+            } else if (TimeUtils.timeSinceMillis(gameOverTimer) > 2000) {
+                androidInterface.goToMainPage();
             }
 
             return;
         }
 
-        //scrolling background
+        // Fondo en movimiento
         renderBackground(deltaTime);
 
+        // Entrada y movimiento del jugador
         detectInput(deltaTime);
         playerShip.update(deltaTime);
 
+        // Generación y render de enemigos
         spawnEnemyShips(deltaTime);
-
         ListIterator<EnemyShip> enemyShipListIterator = enemyShipList.listIterator();
         while (enemyShipListIterator.hasNext()) {
             EnemyShip enemyShip = enemyShipListIterator.next();
@@ -169,18 +200,31 @@ class GameScreen implements Screen {
             enemyShip.draw(batch);
         }
 
+        // Dibujar nave del jugador
         playerShip.draw(batch);
 
-        renderLasers(deltaTime);
+        // Power-ups
+        spawnPowerUps(deltaTime);
+        ListIterator<PowerUp> powerUpIterator = powerUpList.listIterator();
+        while (powerUpIterator.hasNext()) {
+            PowerUp powerUp = powerUpIterator.next();
+            powerUp.update(deltaTime);
+            powerUp.draw(batch);
+        }
 
+        // Láseres y colisiones
+        renderLasers(deltaTime);
         detectCollisions();
 
+        // Explosiones
         updateAndRenderExplosions(deltaTime);
 
+        // HUD
         updateAndRenderHUD();
 
         batch.end();
     }
+
 
     private void updateAndRenderHUD() {
         font.draw(batch, "Score", hudLeftX, hudRow1Y, hudSectionWidth, Align.left, false);
@@ -275,6 +319,20 @@ class GameScreen implements Screen {
         }
     }
 
+
+    private void guardarPuntosEnFirebase(int puntos) {
+        if (androidInterface != null) {
+            androidInterface.savePoints(puntos);
+        } else {
+            Gdx.app.log("GameScreen", "AndroidInterface no inicializada, no se pueden guardar puntos.");
+        }
+    }
+
+
+
+
+
+
     private void moveEnemy(EnemyShip enemyShip, float deltaTime) {
         float leftLimit, rightLimit, upLimit, downLimit;
         leftLimit = -enemyShip.boundingBox.x;
@@ -306,7 +364,13 @@ class GameScreen implements Screen {
                     if (enemyShip.hitAndCheckDestroyed(laser)) {
                         enemyShipListIterator.remove();
                         explosionList.add(new Explosion(explosionTexture, new Rectangle(enemyShip.boundingBox), 0.7f));
-
+                        if (Math.random() < powerUpDropChance) {
+                            powerUpList.add(new PowerUp(
+                                    enemyShip.boundingBox.x + enemyShip.boundingBox.width / 2,
+                                    enemyShip.boundingBox.y,
+                                    powerUpTexture
+                            ));
+                        }
                         if (Gdx.app.getType() == Application.ApplicationType.Android && settingsManager.isVibrationEnabled()) {
                             game.getAndroidInterface().vibrate(100);
                         }
@@ -435,5 +499,8 @@ class GameScreen implements Screen {
     @Override
     public void dispose() {
         batch.dispose();
+        if (powerUpTexture != null) {
+            powerUpTexture.dispose();
+        }
     }
 }
