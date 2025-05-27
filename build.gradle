@@ -12,7 +12,7 @@ buildscript {
         classpath 'com.android.tools:desugar_jdk_libs:2.0.2'
 
         // Añadir clase para el complemento Google Services
-        classpath 'com.google.gms:google-services:4.4.2' // Añadir el complemento de Google Services
+        classpath 'com.google.gms:google-services:4.4.0' // Añadir el complemento de Google Services
     }
 }
 
