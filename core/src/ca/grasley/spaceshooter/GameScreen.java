@@ -29,6 +29,9 @@ class GameScreen implements Screen {
     private SettingsManager settingsManager;
     private Camera camera;
     private Viewport viewport;
+    private boolean gameOver = false;
+
+    //graphics
     private SpriteBatch batch;
     private TextureAtlas textureAtlas;
     private Texture explosionTexture;
@@ -49,6 +52,10 @@ class GameScreen implements Screen {
     private LinkedList<Laser> playerLaserList;
     private LinkedList<Laser> enemyLaserList;
     private LinkedList<Explosion> explosionList;
+    private boolean difficultyIncreased = false;
+    private boolean tripleShotEnabled = false;   // para 4000 pts
+
+
     private int score = 0;
     private BitmapFont font;
     private float hudVerticalMargin, hudLeftX, hudRightX, hudCentreX, hudRow1Y, hudRow2Y, hudSectionWidth;
@@ -87,7 +94,7 @@ class GameScreen implements Screen {
 
         playerShip = new PlayerShip(WORLD_WIDTH / 2, WORLD_HEIGHT / 4,
                 10, 10,
-                48, 3,
+                48, 10,
                 0.4f, 4, 45, 0.5f,
                 playerShipTextureRegion, playerShieldTextureRegion, playerLaserTextureRegion);
 
@@ -130,6 +137,13 @@ class GameScreen implements Screen {
     public void render(float deltaTime) {
         batch.begin();
 
+        if (gameOver) {
+            font.draw(batch, "GAME OVER", WORLD_WIDTH / 2 - 10, WORLD_HEIGHT / 2);
+            batch.end();
+            return;
+        }
+
+        //scrolling background
         renderBackground(deltaTime);
 
         detectInput(deltaTime);
@@ -169,15 +183,26 @@ class GameScreen implements Screen {
     }
 
     private void spawnEnemyShips(float deltaTime) {
+        // Aumentar dificultad al llegar a 2000 puntos
+        if (score >= 2000 && !difficultyIncreased) {
+            difficultyIncreased = true;
+            timeBetweenEnemySpawns *= 0.75f; // Aumenta la frecuencia un 25%
+        }
+
         enemySpawnTimer += deltaTime;
 
         if (enemySpawnTimer > timeBetweenEnemySpawns) {
-            enemyShipList.add(new EnemyShip(SpaceShooterGame.random.nextFloat() * (WORLD_WIDTH - 10) + 5,
+            int shield = difficultyIncreased ? 11 : 10; // +1 de escudo si aumenta la dificultad
+            float laserSpeed = difficultyIncreased ? 60 : 50; // proyectiles más rápidos
+
+            enemyShipList.add(new EnemyShip(
+                    SpaceShooterGame.random.nextFloat() * (WORLD_WIDTH - 10) + 5,
                     WORLD_HEIGHT - 5,
-                    10, 10,
+                    10, shield,
                     48, 1,
-                    0.3f, 5, 50, 0.8f,
+                    0.3f, 5, laserSpeed, 0.8f,
                     enemyShipTextureRegion, enemyShieldTextureRegion, enemyLaserTextureRegion));
+
             enemySpawnTimer -= timeBetweenEnemySpawns;
         }
     }
@@ -294,6 +319,10 @@ class GameScreen implements Screen {
                                     1.6f));
                     playerShip.shield = 10;
                     playerShip.lives--;
+
+                    if (playerShip.lives <= 0) {
+                        gameOver = true;
+                    }
                 }
                 laserListIterator.remove();
             }
