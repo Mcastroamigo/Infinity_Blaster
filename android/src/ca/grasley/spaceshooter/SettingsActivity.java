@@ -69,7 +69,6 @@ public class SettingsActivity extends BaseActivity  {
         userName         = findViewById(R.id.userName);
         soundSeekBar     = findViewById(R.id.soundSeekBar);
         vibrationSwitch  = findViewById(R.id.vibrationSwitch);
-        vibrationIndicator = findViewById(R.id.vibrationIndicator);
         textSizeSeekBar  = findViewById(R.id.textSizeSeekBar);
         logoutButton     = findViewById(R.id.logoutButton);
         saveButton       = findViewById(R.id.saveButton);
@@ -89,9 +88,6 @@ public class SettingsActivity extends BaseActivity  {
             @Override public void onStartTrackingTouch(SeekBar seekBar) {}
             @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
-
-        vibrationSwitch.setOnCheckedChangeListener((btn, isChecked) -> updateVibrationIndicator(isChecked));
-
         textSizeSeekBar.setMax(100);
         textSizeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -154,18 +150,11 @@ public class SettingsActivity extends BaseActivity  {
 
         boolean vibrationEnabled = prefs.getBoolean("vibrationEnabled", true);
         vibrationSwitch.setChecked(vibrationEnabled);
-        updateVibrationIndicator(vibrationEnabled);
 
         int textSizeProgress = (int)((prefs.getFloat("font_scale", 1.0f) * 100) - 50);
         textSizeSeekBar.setProgress(textSizeProgress);
     }
 
-    private void updateVibrationIndicator(boolean enabled) {
-        int color = enabled ?
-                ContextCompat.getColor(this, android.R.color.holo_green_light) :
-                ContextCompat.getColor(this, android.R.color.darker_gray);
-        vibrationIndicator.setBackgroundColor(color);
-    }
 
     private void saveFontScale(float scale) {
         getSharedPreferences(PREFS_NAME, MODE_PRIVATE)

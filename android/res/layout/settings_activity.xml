@@ -58,14 +58,8 @@
             android:layout_height="wrap_content"
             android:text="Vibración"
             android:textColor="#FFFFFF"
-            android:thumbTint="#4CAF50" />
-
-        <View
-            android:id="@+id/vibrationIndicator"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_marginStart="8dp"
-            android:background="@drawable/indicator_background" />
+            android:thumbTint="@color/switch_thumb_selector"
+            android:trackTint="@color/switch_track_selector" />
     </LinearLayout>
 
 
