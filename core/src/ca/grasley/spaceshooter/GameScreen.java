@@ -91,9 +91,6 @@ class GameScreen implements Screen {
             powerUpList.add(newPowerUp);
         }
     }
-    private boolean difficultyIncreased = false;
-    private boolean tripleShotEnabled = false;   // para 4000 pts
-
 
     private int score = 0;
     private BitmapFont font;
