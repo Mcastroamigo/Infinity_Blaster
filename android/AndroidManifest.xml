@@ -3,6 +3,9 @@
     package="ca.grasley.spaceshooter">
 
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.VIBRATE"/>
+
     <application
         android:allowBackup="true"
         android:appCategory="game"
@@ -10,38 +13,40 @@
         android:isGame="true"
         android:label="@string/app_name"
         android:theme="@style/GdxTheme">
+
         <activity
             android:name=".Ranking"
             android:exported="false" />
-        <!-- Esta será la actividad inicial, la de inicio de sesión -->
+
+        <!-- Actividad inicial con ocultación del teclado -->
         <activity
             android:name=".InicioSesion"
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout"
             android:exported="true"
             android:label="@string/app_name"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> <!-- Las demás actividades de la app -->
+        </activity>
+
         <activity
             android:name=".PaginaPrincipal"
             android:exported="false" />
+
         <activity
             android:name=".Registro"
             android:exported="false" />
+
         <activity
             android:name=".AndroidLauncher"
             android:exported="false" />
+
         <activity
             android:name=".SettingsActivity"
             android:exported="false" />
     </application>
-
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.VIBRATE"/>
-
 
 </manifest>

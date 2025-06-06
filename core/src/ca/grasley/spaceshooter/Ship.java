@@ -7,7 +7,7 @@ import com.badlogic.gdx.math.Rectangle;
 abstract class Ship {
 
     //ship characteristics
-    float movementSpeed;  //world units per second
+    float movementSpeed;
     int shield;
 
     //position & dimension

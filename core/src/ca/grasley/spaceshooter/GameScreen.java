@@ -31,7 +31,7 @@ class GameScreen implements Screen {
     private Viewport viewport;
     private boolean gameOver = false;
 
-    //graphics
+    //grapicos
     private SpriteBatch batch;
     private TextureAtlas textureAtlas;
     private Texture explosionTexture;
@@ -143,7 +143,7 @@ class GameScreen implements Screen {
             return;
         }
 
-        //scrolling background
+        //movimiento fondo
         renderBackground(deltaTime);
 
         detectInput(deltaTime);
@@ -212,7 +212,7 @@ class GameScreen implements Screen {
             return;
         }
 
-        //keyboard input
+
         float leftLimit, rightLimit, upLimit, downLimit;
         leftLimit = -playerShip.boundingBox.x;
         downLimit = -playerShip.boundingBox.y;

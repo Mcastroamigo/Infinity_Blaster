@@ -10,7 +10,7 @@ class Laser {
     Rectangle boundingBox;
 
     //laser physical characteristics
-    float movementSpeed; //world units per second
+    float movementSpeed;
 
     //graphics
     TextureRegion textureRegion;
